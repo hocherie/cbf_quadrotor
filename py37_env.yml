@@ -6,3 +6,4 @@ dependencies:
   - matplotlib
   - pip:
     - bresenham
+    - cvxopt

@@ -2,6 +2,58 @@ import numpy as np
 import math 
 
 
+def go_to_acceleration(state, des_acc, param_dict):
+    # pass
+    des_theta, des_thrust_pc = dynamic_inversion(des_acc, state, param_dict)
+    u = pi_attitude_control(
+        state, des_theta, des_thrust_pc, param_dict)  # attitude control
+    return u
+
+
+def dynamic_inversion(des_acc, state, param_dict):
+    """Invert dynamics. For outer loop, given v_tot, compute attitude.
+    Similar to control allocator.
+    TODO: do 1-1 mapping?
+    Parameters
+    ----------
+    self.v_tot
+        total v: v_cr + v_lc - v_ad
+    state #TODO: use self.x
+        state
+    Returns
+    -------
+    desired_theta: np.ndarray(3,)
+        desired roll, pitch, yaw angle (rad) to attitude controller
+    """
+    yaw = state["theta"][2]
+    # tot_u_constant = 408750 * 4  # hover, for four motors
+    # specific_force = tot_u_constant  / param_dict["m"]
+
+    # based on http://research.sabanciuniv.edu/33398/1/ICUAS2017_Final_ZAKI_UNEL_YILDIZ.pdf (Eq. 22-24)
+    U1 = np.linalg.norm(des_acc - np.array([0, 0, param_dict["g"]]))
+    des_pitch_noyaw = np.arcsin(des_acc[0] / U1)
+    des_angle = [des_pitch_noyaw,
+                 np.arcsin(des_acc[1] / (U1 * np.cos(des_pitch_noyaw)))]
+    des_pitch = des_angle[0] * np.cos(yaw) + des_angle[1] * np.sin(yaw)
+    des_roll = des_angle[0] * np.sin(yaw) - des_angle[1] * np.cos(yaw)
+
+    # TODO: move to attitude controller?
+    des_pitch = np.clip(des_pitch, np.radians(-30), np.radians(30))
+    des_roll = np.clip(des_roll, np.radians(-30), np.radians(30))
+
+    # TODO: currently, set yaw as constant
+    des_yaw = yaw
+    des_theta = [des_roll, des_pitch, des_yaw]
+
+    # vertical (acc_z -> thrust)
+
+    thrust = (param_dict["m"] * (des_acc[2] -
+                                    param_dict["g"]))/param_dict["k"]  # T=ma/k
+    max_tot_u = 400000000.0  # TODO: make in param_dict
+    des_thrust_pc = thrust/max_tot_u
+
+    return des_theta, des_thrust_pc
+
 def go_to_position(state, des_pos, param_dict, integral_p_err=None, integral_v_err=None):
 
     des_vel, integral_p_err = pi_position_control(state,des_pos, integral_p_err)

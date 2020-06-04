@@ -14,15 +14,23 @@ def main():
     map1 = Map(src_path_map)
 
     # initialize robot (initializes lidar with map) 
-    robbie = Robot(map1)
+    rob1 = Robot(map1)
+    rob2 = Robot(map1)
+
+    rob2.state["x"][0] = 10
+    rob2.state["x"][1] = 10
 
     for i in range(100):
         print("Time " + str(i))
         plt.cla()
         
-        robbie.update()
+        rob1.update()
         map1.visualize_map()
-        robbie.visualize()
+        rob1.visualize()
+
+        rob2.update()
+        map1.visualize_map()
+        rob2.visualize()
         plt.pause(0.1)
         
     print("done!!")
