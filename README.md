@@ -35,7 +35,7 @@ conda activate py3_cbf
 
 <img src="docs/ecbf_single_obs.gif" width="400">
 
-Robot uses Exponential Control Barrier Functions to stay safe. Uses dynamics and controllers to move.
+Robot uses Exponential Control Barrier Functions to stay safe with respect to single obstacle at center. Minimum interventional safe control (uses control with least difference to nominal while staying safe). Uses dynamics and controllers to move.
 Originally given straight input to goal (red star).
 
 
