@@ -16,20 +16,16 @@ b = 2
 safety_dist = 2
 
 class ECBF_control():
-    def __init__(self, state, goal=np.array([[0], [10]])):
+    def __init__(self, state, goal=np.array([[0], [10]]), Kp=3, Kd=4):
         self.state = state
-        self.shape_dict = {} #TODO: a, b
-        # self.gain_dict = {} #TODO: Kp, Kd
-        Kp = 3
-        Kd = 4
+        self.shape_dict = {} 
+        # Kp = 3
+        # Kd = 4
         self.K = np.array([Kp, Kd])
         self.goal=goal
         self.use_safe = True
-        # pass
 
     def compute_plot_z(self, obs):
-        # obs = np.array([0,1]) #! mock
-
         plot_x = np.arange(-7.5, 7.5, 0.1)
         plot_y = np.arange(-7.5, 7.5, 0.1)
         xx, yy = np.meshgrid(plot_x, plot_y, sparse=True)
@@ -37,17 +33,11 @@ class ECBF_control():
         p = {"x":plot_x, "y":plot_y, "z":z}
         return p
         
-        # plt.show()
     def plot_h(self, plot_x, plot_y, z):
-        # h = plt.contourf(plot_x, plot_y, z, [-1, 0, 1])
         h = plt.contourf(plot_x, plot_y, z,
                          [-1, 0, 1], colors=["grey", "white"])
-        # h = plt.contourf(plot_x, plot_y, z)
         plt.xlabel("X")
         plt.ylabel("Y")
-        proxy = [plt.Rectangle((0, 0), 1, 1, fc=pc.get_facecolor()[0])
-                 for pc in h.collections]
-        # plt.legend(proxy, ["Unsafe: range(-1 to 0)","Safe: range(0 to 1)"])
         plt.legend()
         plt.pause(0.00000001)
 
@@ -114,9 +104,6 @@ class ECBF_control():
 
 
         return optimized_u
-        # u = np.linalg.pinv(A) @ b_ineq
-
-        # return u
 
     def compute_nom_control(self, Kn=np.array([-0.08, -0.2])):
         #! mock
@@ -127,7 +114,6 @@ class ECBF_control():
             u_nom = (u_nom/np.linalg.norm(u_nom))* 0.01
         return u_nom.astype(np.double)
 
-    # def compute_control(self, obs):
 
 @np.vectorize
 def h_func(r1, r2, a, b, safety_dist):
@@ -204,19 +190,14 @@ def main():
         # u_hat_acc2 = robot_step(state2, state2_hist, dyn, ecbf2, new_obs2)
 
         if(tt % 25 == 0):
-            print(tt)
+            print("Timestep", tt)
             plt.cla()
             start_t = time.time()
 
             plot_step(ecbf1, new_obs1, u_hat_acc1, state1_hist)
-            after_plot_step_t = time.time()
-            print("Plot step took  ", after_plot_step_t - start_t)
             # plot_step(ecbf2, new_obs2, u_hat_acc2, state2_hist)
 
             p1 = ecbf1.compute_plot_z(new_obs1)
-            after_compute_plot_z = time.time()
-            print("compute_plot_z took  ",
-                  after_compute_plot_z - after_plot_step_t)
             # p2 = ecbf1.compute_plot_z(new_obs2)
             x = p1["x"]
             y = p1["y"]
@@ -225,9 +206,6 @@ def main():
             # y = (p1["y"] + p2["y"]) / 2
             # z = (p1["z"] + p2["z"]) / 2
             ecbf1.plot_h(x, y, z)
-            after_plot_h = time.time()
-            print("plot_h took  ",
-                  after_plot_h - after_compute_plot_z)
 
 
 
