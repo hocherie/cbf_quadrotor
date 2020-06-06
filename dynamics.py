@@ -1,7 +1,7 @@
 """dynamics.py
 Simulate Simple Quadrotor Dynamics
 
-`python dynamics.py` to see hovering drone
+`python dynamics.py` to see drone step position, then hover with controller in controller.py
 """
 
 import numpy as np

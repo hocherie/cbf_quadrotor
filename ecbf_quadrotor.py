@@ -1,3 +1,8 @@
+"""ecbf_quadrotor.py
+Exponential Control Barrier Function with Quadrotor Dynamics
+
+`python ecbf_quadrotor.py` to see two robots navigating towards each other, with safe control
+"""
 from dynamics import QuadDynamics
 from controller import *
 import numpy as np
@@ -8,24 +13,6 @@ from cvxopt import solvers
 a = 1
 b = 2
 safety_dist = 2
-class SimpleDynamics():
-    def __init__(self):
-        ## State space
-        r = np.array([np.array([1,-4])]).T # position
-        rd = np.array([np.array([0, 0])]).T  # velocity
-        self.state = {"r":r, "rd":rd}
-        ## Params
-        self.dt = 10e-3
-
-        # self.u = zeros(2,1) # acceleration, control input
-
-    def step(self, u):
-        # rdd = self.u
-        rd = self.state["rd"] + self.dt * u - self.state["rd"] * 0.02
-        r = self.state["r"] + self.dt * self.state["rd"]
-
-        self.state["rd"] = rd
-        self.state["r"]  = r
 
 class ECBF_control():
     def __init__(self, state, goal=np.array([[0], [10]])):
@@ -176,9 +163,7 @@ def plot_step(ecbf, new_obs, u_hat_acc, state_hist):
     
 
 def main():
-    # pass
-    # dyn = SimpleDynamics()
-    ### Robot 1
+    ### Initialize Robot 1 (state, dynamics, goal, ecbf control)
     state1 = {"x": np.array([3, -5, 10]),
                 "xdot": np.zeros(3,),
                 "theta": np.radians(np.array([0, 0, 0])),  # ! hardcoded
@@ -188,13 +173,13 @@ def main():
     goal1 = np.array([[-6], [4]])
     ecbf1 = ECBF_control(state1, goal1)
 
-
+    ## Save robot position history for plotting and analysis
     state1_hist = []
     state1_hist.append(state1["x"])
 
     new_obs1 = np.array([[1], [1]])
 
-    ### Robot 2
+    ### Initialize Robot 2 (state, dynamics, goal, ecbf control)
     state2 = {"x": np.array([-5, 3, 10]),
                 "xdot": np.zeros(3,),
                 "theta": np.radians(np.array([0, 0, 0])),  # ! hardcoded
@@ -203,12 +188,12 @@ def main():
     dyn = QuadDynamics()
     goal2 = np.array([[4], [-6]])
     ecbf2 = ECBF_control(state2, goal2)
-
+    ## Save robot position history for plotting and analysis
     state2_hist = []
     state2_hist.append(state2["x"])
 
     new_obs2 = np.array([[1], [1]])
-    for tt in range(20000):
+    for tt in range(20000): # update ECBF obstacle with other robot position
         new_obs1 = state2["x"][:2].reshape(2,1)
         new_obs2 = state1["x"][:2].reshape(2,1)
         # print(new_obs1.shape)
