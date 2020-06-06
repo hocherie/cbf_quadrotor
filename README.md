@@ -4,9 +4,14 @@
 Control Barrier Functions (CBFs) for Quadrotors. Work in progress. Based on [hocherie/2d_grid_playground](https://github.com/hocherie/2d_grid_playground) for dynamics simulator, nominal controllers, range sensing.
 Includes following files:
 
-* **`main.py`**: Simple example on using `simulator.py`, `controller.py` and `dynamics.py`. Quadrotor maneuvering in 2D grid with 2nd order dynamics executing naive safe control.
 
-* **`ecbf_quadrotor.py`**: CBF implementation in `ECBF_CONTROL()` class: Exponential Control Barrier Function. Run to show quadrotor with control barrier function enabled for safe control.
+
+* **`ecbf_control.py`**: Contains `ECBF_CONTROL()` class for Exponential Control Barrier Function (ECBF). 
+
+* **`run_one_robot_obs.py`**: Example - Single quadrotor avoiding obstacle at center using ECBFs.
+
+From [hocherie/2d_grid_playground](https://github.com/hocherie/2d_grid_playground):
+* **`main.py`**: Simple example on using `simulator.py`, `controller.py` and `dynamics.py`. Quadrotor maneuvering in 2D grid with 2nd order dynamics executing naive safe control.
 
 * **`dynamics.py`**: Contains QuadDynamics class which gives a simple 3d quadrotor dynamics given 2nd order equations of motion. Use by instantiating class `dyn=QuadDynamics()` and calling `self.step_dynamics(state, u)` to update quadrotor state. Based on http://andrew.gibiansky.com/downloads/pdf/Quadcopter%20Dynamics,%20Simulation,%20and%20Control.pdf
 
@@ -30,8 +35,8 @@ cd cbf_quadrotor                  # Navigate to folder
 conda env create -f py3_env.yml  # Install Environment
 conda activate py3_cbf
 ```
-### Play with Control Barrier Function Safe Control
-`$ python ecbf_quadrotor.py`
+### Play with Control Barrier Function Safe Control (1 Robot, 1 Obstacle)
+`$ python run_one_robot_obs.py`
 
 <img src="docs/ecbf_single_obs.gif" width="400">
 
