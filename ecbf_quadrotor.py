@@ -14,9 +14,9 @@ import time
 class ECBF_control():
     def __init__(self, state, goal=np.array([[0], [10]]), Kp=3, Kd=4):
         self.state = state
-        self.shape_a = 1 # Ellipsoid Shape
+        self.shape_a = 1 # Ellipsoid ECBF Shape
         self.shape_b = 2 
-        self.safety_dist = 2
+        self.shape_safedist = 2
         self.K = np.array([Kp, Kd]) # ECBF Gain
         self.goal=goal
         self.use_safe = True
@@ -33,7 +33,7 @@ class ECBF_control():
         plot_y = np.arange(-7.5, 7.5, 0.1)
         xx, yy = np.meshgrid(plot_x, plot_y, sparse=True)
         z = self.h_func(xx - obs[0], yy - obs[1], self.shape_a,
-                   self.shape_b, self.safety_dist) > 0
+                   self.shape_b, self.shape_safedist) > 0
         p = {"x":plot_x, "y":plot_y, "z":z}
         return p
         
@@ -50,7 +50,7 @@ class ECBF_control():
     def compute_h(self, obs=np.array([[0], [0]]).T):
         rel_r = np.atleast_2d(self.state["x"][:2]).T - obs
         hr = self.h_func(rel_r[0], rel_r[1], self.shape_a,
-                    self.shape_b, self.safety_dist)
+                    self.shape_b, self.shape_safedist)
         return hr
 
     def compute_hd(self, obs):
