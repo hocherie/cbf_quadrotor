@@ -11,10 +11,6 @@ from cvxopt import matrix
 from cvxopt import solvers
 import time
 
-# a = 1
-# b = 2
-# safety_dist = 2
-
 class ECBF_control():
     def __init__(self, state, goal=np.array([[0], [10]]), Kp=3, Kd=4):
         self.state = state
@@ -24,12 +20,19 @@ class ECBF_control():
         self.K = np.array([Kp, Kd]) # ECBF Gain
         self.goal=goal
         self.use_safe = True
+    
+    @np.vectorize
+    def h_func(r1, r2, a, b, safety_dist):
+        # Ellipsoid ECBF Function
+        hr = np.power(r1, 4)/np.power(a, 4) + \
+            np.power(r2, 4)/np.power(b, 4) - safety_dist
+        return hr
 
     def compute_plot_z(self, obs):
         plot_x = np.arange(-7.5, 7.5, 0.1)
         plot_y = np.arange(-7.5, 7.5, 0.1)
         xx, yy = np.meshgrid(plot_x, plot_y, sparse=True)
-        z = h_func(xx - obs[0], yy - obs[1], self.shape_a,
+        z = self.h_func(xx - obs[0], yy - obs[1], self.shape_a,
                    self.shape_b, self.safety_dist) > 0
         p = {"x":plot_x, "y":plot_y, "z":z}
         return p
@@ -46,7 +49,7 @@ class ECBF_control():
 
     def compute_h(self, obs=np.array([[0], [0]]).T):
         rel_r = np.atleast_2d(self.state["x"][:2]).T - obs
-        hr = h_func(rel_r[0], rel_r[1], self.shape_a,
+        hr = self.h_func(rel_r[0], rel_r[1], self.shape_a,
                     self.shape_b, self.safety_dist)
         return hr
 
@@ -117,11 +120,7 @@ class ECBF_control():
         return u_nom.astype(np.double)
 
 
-@np.vectorize
-def h_func(r1, r2, a, b, safety_dist):
-    hr = np.power(r1,4)/np.power(a, 4) + \
-        np.power(r2, 4)/np.power(b, 4) - safety_dist
-    return hr
+
 
 
 def robot_step(state, state_hist, dyn, ecbf, new_obs):
