@@ -11,17 +11,17 @@ from cvxopt import matrix
 from cvxopt import solvers
 import time
 
-a = 1
-b = 2
-safety_dist = 2
+# a = 1
+# b = 2
+# safety_dist = 2
 
 class ECBF_control():
     def __init__(self, state, goal=np.array([[0], [10]]), Kp=3, Kd=4):
         self.state = state
-        self.shape_dict = {} 
-        # Kp = 3
-        # Kd = 4
-        self.K = np.array([Kp, Kd])
+        self.shape_a = 1 # Ellipsoid Shape
+        self.shape_b = 2 
+        self.safety_dist = 2
+        self.K = np.array([Kp, Kd]) # ECBF Gain
         self.goal=goal
         self.use_safe = True
 
@@ -29,7 +29,8 @@ class ECBF_control():
         plot_x = np.arange(-7.5, 7.5, 0.1)
         plot_y = np.arange(-7.5, 7.5, 0.1)
         xx, yy = np.meshgrid(plot_x, plot_y, sparse=True)
-        z = h_func(xx - obs[0], yy - obs[1], a, b, safety_dist) > 0
+        z = h_func(xx - obs[0], yy - obs[1], self.shape_a,
+                   self.shape_b, self.safety_dist) > 0
         p = {"x":plot_x, "y":plot_y, "z":z}
         return p
         
@@ -45,21 +46,21 @@ class ECBF_control():
 
     def compute_h(self, obs=np.array([[0], [0]]).T):
         rel_r = np.atleast_2d(self.state["x"][:2]).T - obs
-        # TODO: a, safety_dist, obs, b
-        hr = h_func(rel_r[0], rel_r[1], a, b, safety_dist)
+        hr = h_func(rel_r[0], rel_r[1], self.shape_a,
+                    self.shape_b, self.safety_dist)
         return hr
 
     def compute_hd(self, obs):
         rel_r = np.atleast_2d(self.state["x"][:2]).T - obs
         rd = np.atleast_2d(self.state["xdot"][:2]).T
-        term1 = (4 * np.power(rel_r[0],3) * rd[0])/(np.power(a,4))
-        term2 = (4 * np.power(rel_r[1],3) * rd[1])/(np.power(b,4))
+        term1 = (4 * np.power(rel_r[0], 3) * rd[0])/(np.power(self.shape_a, 4))
+        term2 = (4 * np.power(rel_r[1],3) * rd[1])/(np.power(self.shape_b,4))
         return term1+term2
 
     def compute_A(self, obs):
         rel_r = np.atleast_2d(self.state["x"][:2]).T - obs
-        A0 = (4 * np.power(rel_r[0], 3))/(np.power(a, 4))
-        A1 = (4 * np.power(rel_r[1], 3))/(np.power(b, 4))
+        A0 = (4 * np.power(rel_r[0], 3))/(np.power(self.shape_a, 4))
+        A1 = (4 * np.power(rel_r[1], 3))/(np.power(self.shape_b, 4))
 
         return np.array([np.hstack((A0, A1))])
 
@@ -74,8 +75,9 @@ class ECBF_control():
         rel_r = np.atleast_2d(self.state["x"][:2]).T - obs
         rd = np.array(np.array(self.state["xdot"])[:2])
         extra = -(
-            (12 * np.square(rel_r[0]) * np.square(rd[0]))/np.power(a,4) +
-            (12 * np.square(rel_r[1]) * np.square(rd[1]))/np.power(b, 4)
+            (12 * np.square(rel_r[0]) * np.square(rd[0]))/np.power(self.shape_a, 4) +
+            (12 * np.square(rel_r[1]) * np.square(rd[1])) /
+            np.power(self.shape_b, 4)
         )
 
         b_ineq = extra - self.K @ self.compute_h_hd(obs)
