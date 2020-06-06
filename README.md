@@ -9,6 +9,7 @@ Includes following files:
 * **`ecbf_control.py`**: Contains `ECBF_CONTROL()` class for Exponential Control Barrier Function (ECBF). 
 
 * **`run_one_robot_obs.py`**: Example - Single quadrotor avoiding obstacle at center using ECBFs.
+* **`run_two_robots.py`**: Example - Two quadrotor avoiding each other using ECBFs.
 
 From [hocherie/2d_grid_playground](https://github.com/hocherie/2d_grid_playground):
 * **`main.py`**: Simple example on using `simulator.py`, `controller.py` and `dynamics.py`. Quadrotor maneuvering in 2D grid with 2nd order dynamics executing naive safe control.
@@ -65,14 +66,15 @@ Originally given straight input.
 # TODO
 - [x] add ecbf to README
 - [ ] update conda yml file
-- [ ] rename conda environment
+- [x] rename conda environment
 - [x] Start with GIF
 - [x] Update README.md with new screen capture of single-robot ECBF
-- [ ] Update installation instructions
-- [ ] Split CBF functions from run file
-- [ ] Split single robot File and multi-robot file
+- [x] Update installation instructions
+- [x] Split CBF functions from run file
+- [x] Split single robot File and multi-robot file
 - [ ] Comment all functions
 - [ ] Add multi-robot ECBF (MM)
+- [ ] Replace first GIF with cool multi-robot (MM)
 - [ ] Links to reference papers 
 
 # Author
