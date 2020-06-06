@@ -1,4 +1,4 @@
-name: python37_jupyter
+name: py37_cbf
 dependencies:
   - python=3.7
   - numpy
