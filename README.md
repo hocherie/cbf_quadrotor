@@ -36,6 +36,26 @@ cd cbf_quadrotor                  # Navigate to folder
 conda env create -f py3_env.yml  # Install Environment
 conda activate py3_cbf
 ```
+
+#### Note
+if you are having problems using ROS and Conda you can comment out followong line in ~/.bashrc
+```
+>>> conda initialize >>>
+ !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/home/subt/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/home/subt/miniconda3/etc/profile.d/conda.sh" ]; then
+        . "/home/subt/miniconda3/etc/profile.d/conda.sh"
+    else
+        export PATH="/home/subt/miniconda3/bin:$PATH"
+    fi
+```
+and then just initiate conda on terminals where you need it:
+```
+source conda_setup.sh
+```
 ### Play with Control Barrier Function Safe Control (1 Robot, 1 Obstacle)
 `$ python run_one_robot_obs.py`
 
