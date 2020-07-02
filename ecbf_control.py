@@ -179,7 +179,8 @@ class ECBF_control():
     # def compute_control(self, obs):
 
 class Robot_Sim():
-    def __init__(self, x_init, goal_init):
+    def __init__(self, x_init, goal_init, robot_id):
+        self.id = robot_id
         self.state = {"x": x_init,
                 "xdot": np.zeros(3,),
                 "theta": np.radians(np.array([0, 0, 0])),  # ! hardcoded
@@ -204,6 +205,25 @@ class Robot_Sim():
         self.ecbf.state = self.state
         self.state_hist.append(self.state["x"])
         return u_hat_acc
+
+    def update_obstacles(self, robots, obs):
+        obst = []
+        obs_v = []
+        for obj in robots:
+            if obj.id == self.id:
+                continue
+            obst.append(obj.state["x"][:2].reshape(2,1))
+            obs_v.append(obj.state["xdot"][:2].reshape(2,1))
+        if not len(obs):
+            return {"obs":obst, "obs_v":obs_v}
+        for i in range(obs.shape[1]):
+            obst.append(obs[i].reshape(2,1))
+            obs_v.append(np.array([[0], [0]]))
+        
+        obstacles = {"obs":obst, "obs_v":obs_v}
+        return obstacles
+        
+
 
 
 @np.vectorize
@@ -238,7 +258,10 @@ def plot_step(ecbf, new_obs, u_hat_acc, state_hist, plot_handle):
     plot_handle.plot(state_hist_plot[:, 0], state_hist_plot[:, 1],'k')
     plot_handle.plot(ecbf.goal[0], ecbf.goal[1], '*r')
     plot_handle.plot(state_hist_plot[-1, 0], state_hist_plot[-1, 1], '8k') # current
-    plot_handle.plot(new_obs[0, -1], new_obs[1, -1], '8k') # obs
+    print("plot obs shape = "+str(new_obs.shape[1]))
+    for i in range(new_obs.shape[1]):
+        print("plot obs no "+str(i)+" = ( x = "+str(new_obs[0, i])+", y = "+str(new_obs[1, i]))
+        plot_handle.plot(new_obs[0, i], new_obs[1, i], '8k') # obs
     
 
     ell = Ellipse((state_hist_plot[-1, 0], state_hist_plot[-1, 1]), a*safety_dist+0.5, b*safety_dist+0.5, 0)
@@ -247,83 +270,109 @@ def plot_step(ecbf, new_obs, u_hat_acc, state_hist, plot_handle):
     
     plot_handle.add_artist(ell)
     
-    
+# def update_obstacles(robots, obs):
+#     for obj in Robots:
+#         new_obs1 = Robots[1].state["x"][:2].reshape(2,1)
+    # new_obs1 = np.hstack((new_obs1, const_obs))
+    # new_obs1 = np.hstack((new_obs1, const_obs2))
+    # new_obs2 = Robots[0].state["x"][:2].reshape(2,1)
+    # new_obs2 = np.hstack((new_obs2, const_obs))
+    # new_obs2 = np.hstack((new_obs2, const_obs2))
+
+    # obs_v1 = Robots[1].state["xdot"][:2].reshape(2,1)
+    # obs_v1 = np.hstack((obs_v1, const_obs_v))
+    # obs_v1 = np.hstack((obs_v1, const_obs_v2))
+
+    # obs_v2 = Robots[0].state["xdot"][:2].reshape(2,1)
+    # obs_v2 = np.hstack((obs_v2, const_obs_v))
+    # obs_v2 = np.hstack((obs_v2, const_obs_v2))
 
 def main():
     # pass
     # dyn = SimpleDynamics()
+    
     ### Robot 1
     x_init1 = np.array([3, -5, 10])
     goal_init1 =np.array([[-6], [4]])
-    Robot1 = Robot_Sim(x_init1, goal_init1)
+    Robot1 = Robot_Sim(x_init1, goal_init1, 0)
+
     ### Robot 2
 
     x_init2 =np.array([-5, 3, 10])
     goal_init2 =np.array([[4], [-6]])
-    Robot2 = Robot_Sim(x_init2, goal_init2)
+    Robot2 = Robot_Sim(x_init2, goal_init2, 1)
+
+
+    ### Robot 3
+
+    x_init3 =np.array([-5, -3, 10])
+    goal_init3 =np.array([[6], [4]])
+    Robot3 = Robot_Sim(x_init3, goal_init3, 2)
+    
+    Robots = [Robot1, Robot2, Robot3]
 
     plt.plot([2, 2, 3])
 
     a, ax1 = plt.subplots()
     
-    const_obs = np.array([[.5], [.5]])
-    const_obs2 = np.array([[-0.5], [-0.5]])
-    const_obs_v = np.array([[0], [0]])
-    const_obs_v2 = np.array([[0], [0]])
+    const_obs = np.array([[1], [1]])
+    const_obs2 = np.array([[-2], [-2]])
+
+    obs = np.hstack((const_obs2, const_obs)).T
+    # obs = []
+
+    
 
     # b, ax2 = plt.subplots()
-    
     for tt in range(20000):
-        new_obs1 = Robot2.state["x"][:2].reshape(2,1)
-        new_obs1 = np.hstack((new_obs1, const_obs))
-        new_obs1 = np.hstack((new_obs1, const_obs2))
-        new_obs2 = Robot1.state["x"][:2].reshape(2,1)
-        new_obs2 = np.hstack((new_obs2, const_obs))
-        new_obs2 = np.hstack((new_obs2, const_obs2))
 
-        obs_v1 = Robot2.state["xdot"][:2].reshape(2,1)
-        obs_v1 = np.hstack((obs_v1, const_obs_v))
-        obs_v1 = np.hstack((obs_v1, const_obs_v2))
-
-        obs_v2 = Robot1.state["xdot"][:2].reshape(2,1)
-        obs_v2 = np.hstack((obs_v2, const_obs_v))
-        obs_v2 = np.hstack((obs_v2, const_obs_v2))
-
+        obstacles = []
+        
+        for obj in Robots:
+            obstacles.append(obj.update_obstacles(Robots, obs))
         # print("obs = "+str(new_obs1))
         # print("obs.shape = "+str(new_obs1.shape))
-
+        # print("obs.shape = "+str(np.array(obstacles[0]["obs"])[:, :, 0].T.shape))
         # print(new_obs1.shape)
-        u_hat_acc1 = Robot1.robot_step(new_obs1, obs_v1)
-        u_hat_acc2 = Robot2.robot_step(new_obs2, obs_v2)
+        u_hat_acc = []
+        cnt = 0
+        
+        for obj in Robots:
+            u_hat_acc.append(obj.robot_step(np.array(obstacles[cnt]["obs"])[:, :, 0].T, np.array(obstacles[cnt]["obs_v"])[:, :, 0].T))
+            cnt = cnt + 1
+        # u_hat_acc2 = Robots[1].robot_step(new_obs2, obs_v2)
 
-        obs = np.hstack((obs_v1, obs_v2, obs_v2))
+        # obs = np.hstack((obs_v1, obs_v2, obs_v2))
         
 
         
-        if(tt % 50 == 0):
+        if(tt % 200 == 0):
             print(tt)
             plt.cla()
-            
-            plot_step(Robot1.ecbf, new_obs1, u_hat_acc1, Robot1.state_hist, ax1)
-            plot_step(Robot2.ecbf, new_obs2, u_hat_acc2, Robot2.state_hist, ax1)
+            cnt = 0
+            p = []
+            x = 0
+            y = 0
+            z = 0
+            for obj in Robots:
+                plot_step(obj.ecbf, np.array(obstacles[cnt]["obs"])[:, :, 0].T, u_hat_acc[cnt], obj.state_hist, ax1)
+                # plot_step(Robots[1].ecbf, new_obs2, u_hat_acc2, Robots[1].state_hist, ax1)
 
-            p1 = Robot1.ecbf.compute_plot_z(new_obs1)
-            p2 = Robot2.ecbf.compute_plot_z(new_obs2)
-            x = (p1["x"] + p2["x"]) / 2
-            y = (p1["y"] + p2["y"]) / 2
-            z = (p1["z"] + p2["z"]) / 2
-            Robot1.ecbf.plot_h(x, y, z)
-            
+                p.append( obj.ecbf.compute_plot_z(const_obs) )
+                # p2 = Robots[1].ecbf.compute_plot_z(new_obs2)
+                # x = (p[0]["x"] + p[1]["x"]) / 2
+                # y = (p[0]["y"] + p[1]["y"]) / 2
+                # z = (p[0]["z"] + p[1]["z"]) / 2
+
+                x = x + p[cnt]["x"]
+                y = y + p[cnt]["y"]
+                z = z + p[cnt]["z"]
+                
+                cnt = cnt + 1
             # ax2.plot(p1["x"], p1["y"])
+            Robot2.ecbf.plot_h(x/cnt, y/cnt, z/cnt)
             plt.pause(0.00000001)
-            
-
-
-
-
-
-
-
+        
 
 
 
