@@ -6,8 +6,8 @@ from cvxopt import matrix
 from cvxopt import solvers
 from matplotlib.patches import Ellipse
 
-a = 2
-b = 1.2
+a = 1
+b = 1
 safety_dist = 2
 class SimpleDynamics():
     def __init__(self):
@@ -51,13 +51,13 @@ class ECBF_control():
             ztemp = h_func(xx - obs[0][i], yy - obs[1][i], a, b, safety_dist) > 0
             # print("z temp size = "+str(ztemp.shape))
             z = z + ztemp
-        z = z / obs.shape[1]
+        z = z / (obs.shape[1]-1)
         p = {"x":plot_x, "y":plot_y, "z":z}
         return p
         
         # plt.show()
     def plot_h(self, plot_x, plot_y, z):
-        h = plt.contourf(plot_x, plot_y, z, [-1, 0, 1])
+        h = plt.contourf(plot_x, plot_y, z, [-1, 0, 1],colors=['#808080', '#A0A0A0', '#C0C0C0'])
         # h = plt.contourf(plot_x, plot_y, z)
         plt.xlabel("X")
         plt.ylabel("Y")
@@ -346,7 +346,7 @@ def main():
         
 
         
-        if(tt % 200 == 0):
+        if(tt % 20 == 0):
             print(tt)
             plt.cla()
             cnt = 0
@@ -358,7 +358,7 @@ def main():
                 plot_step(obj.ecbf, np.array(obstacles[cnt]["obs"])[:, :, 0].T, u_hat_acc[cnt], obj.state_hist, ax1)
                 # plot_step(Robots[1].ecbf, new_obs2, u_hat_acc2, Robots[1].state_hist, ax1)
 
-                p.append( obj.ecbf.compute_plot_z(const_obs) )
+                p.append( obj.ecbf.compute_plot_z(np.array(obstacles[cnt]["obs"])[:, :, 0].T) )
                 # p2 = Robots[1].ecbf.compute_plot_z(new_obs2)
                 # x = (p[0]["x"] + p[1]["x"]) / 2
                 # y = (p[0]["y"] + p[1]["y"]) / 2
