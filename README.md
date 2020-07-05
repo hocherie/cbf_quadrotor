@@ -32,13 +32,11 @@ From [hocherie/2d_grid_playground](https://github.com/hocherie/2d_grid_playgroun
 Please install pyenv, if not already. [Instructions.](https://realpython.com/intro-to-pyenv/) Specifically, follow (1) build dependecies and (2) Using the pyenv-installer.
 
 
-
 ```
 git clone https://github.com/hocherie/cbf_quadrotor.git     # Clone Repo
 cd cbf_quadrotor                    # Navigate to folder
 $ pyenv install -v 3.7.2            # Install Python
 $ pyenv virtualenv 3.7.2 safety-cbf # Make Virtual Environment
-JUST FOR NOW $ git checkout cherieh/pyenv
 $ pyenv local safety-cbf            # Activate virtual env
 $ pip install -r requirements.txt   # Install dependencies
 ```
