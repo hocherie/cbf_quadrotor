@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from cvxopt import matrix
 from cvxopt import solvers
 from matplotlib.patches import Ellipse
+import time
 
 a = 1
 b = 1
@@ -37,8 +38,8 @@ class ECBF_control():
         # pass
 
     def compute_plot_z(self, obs):
-        plot_x = np.arange(-10, 10, 0.4)
-        plot_y = np.arange(-10, 10, 0.4)
+        plot_x = np.arange(-7.5, 7.5, 0.4)
+        plot_y = np.arange(-7.5, 7.5, 0.4)
         xx, yy = np.meshgrid(plot_x, plot_y, sparse=True)
         z = np.zeros(xx.shape)
         for i in range(obs.shape[1]):
@@ -53,7 +54,7 @@ class ECBF_control():
         h = plt.contourf(plot_x, plot_y, z, [-1, 0, 1],colors=['#808080', '#A0A0A0', '#C0C0C0'])
         plt.xlabel("X")
         plt.ylabel("Y")
-        plt.legend()
+        # plt.legend()
         plt.pause(0.00000001)
 
 
@@ -109,7 +110,7 @@ class ECBF_control():
 
 
 
-    def compute_safe_control(self,obs, obs_v):
+    def compute_safe_control(self,obs, obs_v, id):
         if self.use_safe:
             A = self.compute_A(obs)
 
@@ -121,9 +122,14 @@ class ECBF_control():
 
             h = -1 * matrix(b_ineq.astype(np.double), tc='d')
             solvers.options['show_progress'] = False
-            sol = solvers.qp(P,q,G, h, verbose=False) # get dictionary for solution
+            try:
+                sol = solvers.qp(P,q,G, h, verbose=False) # get dictionary for solution
+                optimized_u = sol['x']
+            except:
+                print("Robot "+str(id)+": NO SOLUTION!!!")
+                optimized_u = [[0], [0]]
 
-            optimized_u = sol['x']
+            
 
         else:
             optimized_u = self.compute_nom_control()
@@ -136,8 +142,8 @@ class ECBF_control():
         vd = Kn[0]*(np.atleast_2d(self.state["x"][:2]).T - self.goal)
         u_nom = Kn[1]*(np.atleast_2d(self.state["xdot"][:2]).T - vd)
 
-        if np.linalg.norm(u_nom) > 0.01:
-            u_nom = (u_nom/np.linalg.norm(u_nom))* 0.01
+        if np.linalg.norm(u_nom) > 0.1:
+            u_nom = (u_nom/np.linalg.norm(u_nom))* 0.1
         return u_nom.astype(np.double)
 
 
@@ -159,7 +165,7 @@ class Robot_Sim():
 
         self.new_obs = np.array([[1], [1]])
     def robot_step(self, new_obs, obs_v):
-        u_hat_acc = self.ecbf.compute_safe_control(obs=new_obs, obs_v=obs_v)
+        u_hat_acc = self.ecbf.compute_safe_control(obs=new_obs, obs_v=obs_v, id=self.id)
         u_hat_acc = np.ndarray.flatten(np.array(np.vstack((u_hat_acc,np.zeros((1,1))))))  # acceleration
         assert(u_hat_acc.shape == (3,))
         u_motor = go_to_acceleration(self.state, u_hat_acc, self.dyn.param_dict) # desired motor rate ^2
@@ -196,10 +202,10 @@ def h_func(r1, r2, a, b, safety_dist):
     return hr
 
 
-def plot_step(ecbf, new_obs, u_hat_acc, state_hist, plot_handle):
+def plot_step(id, ecbf, new_obs, u_hat_acc, state_hist, plot_handle):
     state_hist_plot = np.array(state_hist)
     nom_cont = ecbf.compute_nom_control()
-    multiplier_const = 100
+    multiplier_const = 10
     plot_handle.plot([state_hist_plot[-1, 0], state_hist_plot[-1, 0] + multiplier_const *
                 u_hat_acc[0]],
                 [state_hist_plot[-1, 1], state_hist_plot[-1, 1] + multiplier_const * u_hat_acc[1]], label="Safe")
@@ -207,9 +213,10 @@ def plot_step(ecbf, new_obs, u_hat_acc, state_hist, plot_handle):
                 nom_cont[0]],
                 [state_hist_plot[-1, 1], state_hist_plot[-1, 1] + multiplier_const * nom_cont[1]],label="Nominal")
 
-    plot_handle.plot(state_hist_plot[:, 0], state_hist_plot[:, 1],'k')
+    plot_handle.plot(state_hist_plot[:, 0], state_hist_plot[:, 1])
     plot_handle.plot(ecbf.goal[0], ecbf.goal[1], '*r')
     plot_handle.plot(state_hist_plot[-1, 0], state_hist_plot[-1, 1], '8k') # current
+    plot_handle.text(state_hist_plot[-1,0]+0.1, state_hist_plot[-1,1]+0.1, str(id))
     for i in range(new_obs.shape[1]):
         plot_handle.plot(new_obs[0, i], new_obs[1, i], '8k') # obs
     
@@ -246,8 +253,14 @@ def main():
     x_init4 =np.array([5, 3, 10])
     goal_init4 =np.array([[-4], [-6]])
     Robot4 = Robot_Sim(x_init4, goal_init4, 3)
+
+    ### Robot 5
+
+    x_init5 =np.array([5, 0, 10])
+    goal_init5 =np.array([[-6], [0]])
+    Robot5 = Robot_Sim(x_init5, goal_init5, 4)
     
-    Robots = [Robot1, Robot2, Robot3, Robot4]
+    Robots = [Robot1, Robot2, Robot3, Robot4, Robot5]
 
     plt.plot([2, 2, 3])
 
@@ -269,7 +282,7 @@ def main():
         for robot in Robots:
             u_hat_acc.append(robot.robot_step(np.array(obstacles[robot.id]["obs"])[:, :, 0].T, np.array(obstacles[robot.id]["obs_v"])[:, :, 0].T))
 
-        if(tt % 50 == 0):
+        if(tt % 10 == 0):
             print(tt)
             plt.cla()
             sz = 0
@@ -278,17 +291,24 @@ def main():
             y = 0
             z = 0
             for robot in Robots:
-                plot_step(robot.ecbf, np.array(obstacles[robot.id]["obs"])[:, :, 0].T, u_hat_acc[robot.id], robot.state_hist, ax1)
-
+                # start_time = time.time()
+                plot_step(robot.id, robot.ecbf, np.array(obstacles[robot.id]["obs"])[:, :, 0].T, u_hat_acc[robot.id], robot.state_hist, ax1)
+                # proc2_time = time.time()
+                # print("Time Elapsed (plot_step)", proc2_time - start_time)
+                
+                
                 p.append( robot.ecbf.compute_plot_z(np.array(obstacles[robot.id]["obs"])[:, :, 0].T) )
-
+                # proc3_time = time.time()
+                # print("Time Elapsed (compute_plot_z)", proc3_time - proc2_time)
                 x = x + p[robot.id]["x"]
                 y = y + p[robot.id]["y"]
                 z = z + p[robot.id]["z"]
                 
                 sz = sz + 1
-
+            # start_time = time.time()
             Robot2.ecbf.plot_h(x/sz, y/sz, z/sz)
+            # proc2_time = time.time()
+            # print("Time Elapsed (plot_H)", proc2_time - start_time)
             plt.pause(0.00000001)
 
 if __name__=="__main__":
