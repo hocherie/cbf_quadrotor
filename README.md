@@ -29,37 +29,18 @@ From [hocherie/2d_grid_playground](https://github.com/hocherie/2d_grid_playgroun
 ## Getting Started 
 
 ### Installation
-Please install pyenv, if not already. [Instructions](https://realpython.com/intro-to-pyenv/)
+Please install pyenv, if not already. [Instructions.](https://realpython.com/intro-to-pyenv/) Specifically, follow (1) build dependecies and (2) Using the pyenv-installer.
+
 
 ```
 git clone https://github.com/hocherie/cbf_quadrotor.git     # Clone Repo
 cd cbf_quadrotor                    # Navigate to folder
 $ pyenv install -v 3.7.2            # Install Python
 $ pyenv virtualenv 3.7.2 safety-cbf # Make Virtual Environment
-JUST FOR NOW $ git checkout cherieh/pyenv
 $ pyenv local safety-cbf            # Activate virtual env
 $ pip install -r requirements.txt   # Install dependencies
 ```
 
-#### Note
-if you are having problems using ROS and Conda you can comment out followong line in ~/.bashrc
-```
->>> conda initialize >>>
- !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/home/subt/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/home/subt/miniconda3/etc/profile.d/conda.sh" ]; then
-        . "/home/subt/miniconda3/etc/profile.d/conda.sh"
-    else
-        export PATH="/home/subt/miniconda3/bin:$PATH"
-    fi
-```
-and then just initiate conda on terminals where you need it:
-```
-source conda_setup.sh
-```
 ### Play with Control Barrier Function Safe Control (1 Robot, 1 Obstacle)
 `$ python run_one_robot_obs.py`
 

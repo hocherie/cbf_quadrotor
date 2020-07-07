@@ -10,21 +10,6 @@ import time
 a = 1
 b = 1
 safety_dist = 2
-class SimpleDynamics():
-    def __init__(self):
-        ## State space
-        r = np.array([np.array([1,-4])]).T # position
-        rd = np.array([np.array([0, 0])]).T  # velocity
-        self.state = {"r":r, "rd":rd}
-        ## Params
-        self.dt = 10e-3
-
-    def step(self, u):
-        rd = self.state["rd"] + self.dt * u - self.state["rd"] * 0.02
-        r = self.state["r"] + self.dt * self.state["rd"]
-
-        self.state["rd"] = rd
-        self.state["r"]  = r
 
 class ECBF_control():
     def __init__(self, state, goal=np.array([[0], [10]])):

@@ -1,8 +1,0 @@
-name: py3_cbf
-dependencies:
-  - python=3.6
-  - numpy
-  - pandas
-  - matplotlib
-  - pip:
-    - cvxopt
