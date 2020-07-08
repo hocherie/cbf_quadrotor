@@ -7,7 +7,7 @@ from cvxopt import solvers
 from matplotlib.patches import Ellipse
 import time
 
-a = 1
+a = 2
 b = 1
 safety_dist = 2
 robot_radius = 0.25
@@ -120,7 +120,7 @@ class ECBF_control():
         else:
             optimized_u = self.compute_nom_control()
 
-
+        optimized_u += np.random.random()*np.linalg.norm(optimized_u)*.1
         return optimized_u
 
     def compute_nom_control(self, Kn=np.array([-0.08, -0.2])):
