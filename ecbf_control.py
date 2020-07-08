@@ -10,6 +10,7 @@ import time
 a = 1
 b = 1
 safety_dist = 2
+robot_radius = 0.25
 
 class ECBF_control():
     def __init__(self, state, goal=np.array([[0], [10]])):
@@ -160,13 +161,19 @@ class Robot_Sim():
         self.state_hist.append(self.state["x"])
         return u_hat_acc
 
-    def update_obstacles(self, robots, obs):
+    def update_obstacles(self, robots, obs, noisy = False):
         obst = []
         obs_v = []
         for robot in robots:
             if robot.id == self.id:
                 continue
-            obst.append(robot.state["x"][:2].reshape(2,1))
+            if np.linalg.norm( robot.state["x"][:2] - self.state["x"][:2]) < robot_radius:
+                print("CRASH!!!!!!!!!!!!!!!!!!!!")
+            
+            obst_temp = robot.state["x"][:2] 
+            if noisy:
+                obst_temp = obst_temp + np.array([[0.5], [0.5]]).T #+ (np.random.random(2)*2-1)
+            obst.append(obst_temp.reshape(2,1))
             obs_v.append(robot.state["xdot"][:2].reshape(2,1))
         if not len(obs):
             return {"obs":obst, "obs_v":obs_v}
@@ -176,6 +183,7 @@ class Robot_Sim():
         
         obstacles = {"obs":obst, "obs_v":obs_v}
         return obstacles
+
         
 
 
@@ -200,7 +208,7 @@ def plot_step(id, ecbf, new_obs, u_hat_acc, state_hist, plot_handle):
 
     plot_handle.plot(state_hist_plot[:, 0], state_hist_plot[:, 1])
     plot_handle.plot(ecbf.goal[0], ecbf.goal[1], '*r')
-    plot_handle.plot(state_hist_plot[-1, 0], state_hist_plot[-1, 1], '8k') # current
+    # plot_handle.plot(state_hist_plot[-1, 0], state_hist_plot[-1, 1], '8k') # current
     plot_handle.text(state_hist_plot[-1,0]+0.1, state_hist_plot[-1,1]+0.1, str(id))
     for i in range(new_obs.shape[1]):
         plot_handle.plot(new_obs[0, i], new_obs[1, i], '8k') # obs
@@ -208,6 +216,12 @@ def plot_step(id, ecbf, new_obs, u_hat_acc, state_hist, plot_handle):
 
     ell = Ellipse((state_hist_plot[-1, 0], state_hist_plot[-1, 1]), a*safety_dist+0.5, b*safety_dist+0.5, 0)
     ell.set_alpha(0.3)
+    ell.set_facecolor(np.array([0, 1, 0]))
+    
+    plot_handle.add_artist(ell)
+
+    ell = Ellipse((state_hist_plot[-1, 0], state_hist_plot[-1, 1]), robot_radius+0.5, robot_radius+0.5, 0)
+    ell.set_alpha(0.8)
     ell.set_facecolor(np.array([1, 0, 0]))
     
     plot_handle.add_artist(ell)
