@@ -16,20 +16,13 @@ def main():
     x_init2 =np.array([-5, 3, 10])
     goal_init2 =np.array([[4], [-6]])
     Robot2 = Robot_Sim(x_init2, goal_init2, robot_id=1)
-    Robots = [Robot1, Robot2]
+    
 
     #! EXERCISE 3: ADD 2 More Robots (4 in Total). Don't overlap
-
     #! EXERCISE 4: CREATE DEADLOCK WITH 4 ROBOTS, FIX IT
-    # x_init3 =np.array([-0, -6, 10])
-    # goal_init3 =np.array([[0], [6]])
-    # Robot3 = Robot_Sim(x_init3, goal_init3, robot_id=2)    
 
-    # x_init4 =np.array([6, -0, 10])
-    # goal_init4 =np.array([[-6], [0]])
-    # Robot4 = Robot_Sim(x_init4, goal_init4, robot_id=3)    
 
-    # Robots = [Robot1, Robot2, Robot3, Robot4] #! E3: Append with new robots
+    Robots = [Robot1, Robot2] #! E3: Append with new robots
 
     
 
@@ -42,7 +35,7 @@ def main():
 
         obstacles = []
         for robot in Robots:
-            #! EXERCISE 2: STATE ESTIMATION ERROR
+            #! EXERCISE 2: STATE ESTIMATION ERROR (noisy=True)
             obstacles.append(robot.update_obstacles(Robots, obs, noisy=False))
 
         u_hat_acc = []

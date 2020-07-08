@@ -99,24 +99,7 @@ class ECBF_control():
 
     def compute_safe_control(self,obs, obs_v, id):
         if self.use_safe:
-            # optimized_u = self.compute_nom_control() #! REPLACE!! Exercise 1: Write Minimum Interventional Control
-            A = self.compute_A(obs)
-
-            b_ineq = self.compute_b(obs, obs_v)
-            #Make CVXOPT quadratic programming problem
-            P = matrix(np.eye(2), tc='d')
-            q = -1 * matrix(self.compute_nom_control(), tc='d')
-            G = -1 * matrix(A.astype(np.double), tc='d')
-
-            h = -1 * matrix(b_ineq.astype(np.double), tc='d')
-            solvers.options['show_progress'] = False
-            try:
-                sol = solvers.qp(P,q,G, h, verbose=False) # get dictionary for solution
-                optimized_u = sol['x']
-                optimized_u += np.random.random()*np.linalg.norm(optimized_u)*.1 #! REMOVE 
-            except:
-                print("Robot "+str(id)+": NO SOLUTION!!!")
-                optimized_u = [[0], [0]]
+            optimized_u = self.compute_nom_control() #! REPLACE!! Exercise 1: Write Minimum Interventional Control
 
         else:
             optimized_u = self.compute_nom_control()
