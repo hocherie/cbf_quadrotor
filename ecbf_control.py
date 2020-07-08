@@ -12,8 +12,9 @@ warnings.filterwarnings("ignore")
 
 a = 1
 b = 1
-safety_dist = 2
-robot_radius = 0.25
+safety_dist = 1
+robot_radius = 0.5
+is_crash = False # Sets title as Crashed when crashed once
 
 class ECBF_control():
     def __init__(self, state, goal=np.array([[0], [10]])):
@@ -24,7 +25,6 @@ class ECBF_control():
         self.K = np.array([Kp, Kd])
         self.goal=goal
         self.use_safe = True
-        # pass
 
     def compute_plot_z(self, obs):
         plot_x = np.arange(-7.5, 7.5, 0.4)
@@ -38,12 +38,11 @@ class ECBF_control():
         p = {"x":plot_x, "y":plot_y, "z":z}
         return p
         
-        # plt.show()
+        
     def plot_h(self, plot_x, plot_y, z):
         h = plt.contourf(plot_x, plot_y, z, [-1, 0, 1],colors=['#808080', '#A0A0A0', '#C0C0C0'])
         plt.xlabel("X")
         plt.ylabel("Y")
-        # plt.legend()
         plt.pause(0.00000001)
 
 
@@ -77,7 +76,6 @@ class ECBF_control():
             
             A = np.array(np.vstack((A, Atemp)))
         
-        
         return A
 
     def compute_h_hd(self, obs, obs_v):
@@ -101,34 +99,32 @@ class ECBF_control():
 
     def compute_safe_control(self,obs, obs_v, id):
         if self.use_safe:
-            optimized_u = self.compute_nom_control() ## Exercise 1: Write Minimum Interventional Control
-            # A = self.compute_A(obs)
+            # optimized_u = self.compute_nom_control() #! REPLACE!! Exercise 1: Write Minimum Interventional Control
+            A = self.compute_A(obs)
 
-            # b_ineq = self.compute_b(obs, obs_v)
-            # #Make CVXOPT quadratic programming problem
-            # P = matrix(np.eye(2), tc='d')
-            # q = -1 * matrix(self.compute_nom_control(), tc='d')
-            # G = -1 * matrix(A.astype(np.double), tc='d')
+            b_ineq = self.compute_b(obs, obs_v)
+            #Make CVXOPT quadratic programming problem
+            P = matrix(np.eye(2), tc='d')
+            q = -1 * matrix(self.compute_nom_control(), tc='d')
+            G = -1 * matrix(A.astype(np.double), tc='d')
 
-            # h = -1 * matrix(b_ineq.astype(np.double), tc='d')
-            # solvers.options['show_progress'] = False
-            # try:
-            #     sol = solvers.qp(P,q,G, h, verbose=False) # get dictionary for solution
-            #     optimized_u = sol['x']
-            # except:
-            #     print("Robot "+str(id)+": NO SOLUTION!!!")
-            #     optimized_u = [[0], [0]]
-
-            
+            h = -1 * matrix(b_ineq.astype(np.double), tc='d')
+            solvers.options['show_progress'] = False
+            try:
+                sol = solvers.qp(P,q,G, h, verbose=False) # get dictionary for solution
+                optimized_u = sol['x']
+                optimized_u += np.random.random()*np.linalg.norm(optimized_u)*.1 #! REMOVE 
+            except:
+                print("Robot "+str(id)+": NO SOLUTION!!!")
+                optimized_u = [[0], [0]]
 
         else:
             optimized_u = self.compute_nom_control()
 
-        optimized_u += np.random.random()*np.linalg.norm(optimized_u)*.1
+        
         return optimized_u
 
     def compute_nom_control(self, Kn=np.array([-0.08, -0.2])):
-        #! mock
         vd = Kn[0]*(np.atleast_2d(self.state["x"][:2]).T - self.goal)
         u_nom = Kn[1]*(np.atleast_2d(self.state["xdot"][:2]).T - vd)
 
@@ -173,10 +169,12 @@ class Robot_Sim():
                 continue
             if np.linalg.norm( robot.state["x"][:2] - self.state["x"][:2]) < robot_radius:
                 print("CRASH!!!!!!!!!!!!!!!!!!!!")
+                global is_crash 
+                is_crash = True
             
             obst_temp = robot.state["x"][:2] 
             if noisy:
-                obst_temp = obst_temp + np.array([[0.5], [0.5]]).T #+ (np.random.random(2)*2-1)
+                obst_temp = obst_temp + (np.random.random(2)*2-1) # + np.array([[0.5], [0.5]]).T 
             obst.append(obst_temp.reshape(2,1))
             obs_v.append(robot.state["xdot"][:2].reshape(2,1))
         if not len(obs):
@@ -202,18 +200,21 @@ def h_func(r1, r2, a, b, safety_dist):
 def plot_step(id, ecbf, new_obs, u_hat_acc, state_hist, plot_handle):
     state_hist_plot = np.array(state_hist)
     nom_cont = ecbf.compute_nom_control()
-    multiplier_const = 10
+    multiplier_const = 15
     plot_handle.plot([state_hist_plot[-1, 0], state_hist_plot[-1, 0] + multiplier_const *
                 u_hat_acc[0]],
-                [state_hist_plot[-1, 1], state_hist_plot[-1, 1] + multiplier_const * u_hat_acc[1]], label="Safe")
+                [state_hist_plot[-1, 1], state_hist_plot[-1, 1] + multiplier_const * u_hat_acc[1]], label="Safe", color='b')
     plot_handle.plot([state_hist_plot[-1, 0], state_hist_plot[-1, 0] + multiplier_const *
                 nom_cont[0]],
-                [state_hist_plot[-1, 1], state_hist_plot[-1, 1] + multiplier_const * nom_cont[1]],label="Nominal")
+                [state_hist_plot[-1, 1], state_hist_plot[-1, 1] + multiplier_const * nom_cont[1]],label="Nominal",color='orange')
 
     plot_handle.plot(state_hist_plot[:, 0], state_hist_plot[:, 1])
     plot_handle.plot(ecbf.goal[0], ecbf.goal[1], '*r')
     # plot_handle.plot(state_hist_plot[-1, 0], state_hist_plot[-1, 1], '8k') # current
-    plot_handle.text(state_hist_plot[-1,0]+0.1, state_hist_plot[-1,1]+0.1, str(id))
+    plot_handle.text(state_hist_plot[-1,0]+0.2, state_hist_plot[-1,1]+0.2, str(id))
+    if is_crash:
+        plot_handle.set_title("CRASHED!")
+
     for i in range(new_obs.shape[1]):
         plot_handle.plot(new_obs[0, i], new_obs[1, i], '8k') # obs
     
@@ -229,3 +230,6 @@ def plot_step(id, ecbf, new_obs, u_hat_acc, state_hist, plot_handle):
     ell.set_facecolor(np.array([1, 0, 0]))
     
     plot_handle.add_artist(ell)
+
+    plot_handle.set_xlim([-10, 10])
+    plot_handle.set_ylim([-10, 10])

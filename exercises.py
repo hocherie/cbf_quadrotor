@@ -4,36 +4,46 @@ import ecbf_control
 from ecbf_control import Robot_Sim
 
 def main():
+    #! EXERCISE 1: FILL OUT ECBF_CONTROL.PY compute_safe_control()
     
-    ### Robot 1
-    x_init1 = np.array([0, 6, 10])
-    goal_init1 =np.array([[0], [-6]])
-    Robot1 = Robot_Sim(x_init1, goal_init1, 0)
+    ### Define Robot 1
+    x_init1 = np.array([3, -5, 10])
+    goal_init1 =np.array([[-6], [4]])
+    Robot1 = Robot_Sim(x_init1, goal_init1, robot_id=0)
 
-    ### Robot 2
+    ### Define Robot 2
 
-    x_init2 =np.array([0, -6, 10])
-    goal_init2 =np.array([[0], [6]])
-    Robot2 = Robot_Sim(x_init2, goal_init2, 1)
-
+    x_init2 =np.array([-5, 3, 10])
+    goal_init2 =np.array([[4], [-6]])
+    Robot2 = Robot_Sim(x_init2, goal_init2, robot_id=1)
     Robots = [Robot1, Robot2]
 
-    plt.plot([1, 1, 1])
+    #! EXERCISE 3: ADD 2 More Robots (4 in Total). Don't overlap
+
+    #! EXERCISE 4: CREATE DEADLOCK WITH 4 ROBOTS, FIX IT
+    # x_init3 =np.array([-0, -6, 10])
+    # goal_init3 =np.array([[0], [6]])
+    # Robot3 = Robot_Sim(x_init3, goal_init3, robot_id=2)    
+
+    # x_init4 =np.array([6, -0, 10])
+    # goal_init4 =np.array([[-6], [0]])
+    # Robot4 = Robot_Sim(x_init4, goal_init4, robot_id=3)    
+
+    # Robots = [Robot1, Robot2, Robot3, Robot4] #! E3: Append with new robots
+
+    
 
     a, ax1 = plt.subplots()
     
-    ## Obstacles
-    const_obs = np.array([[2], [2]])
-    const_obs2 = np.array([[-1], [-1]])
-
-    # obs = np.hstack((const_obs2, const_obs)).T    
+    ## Define Obstacles
     obs = []  
 
     for tt in range(20000):
 
         obstacles = []
         for robot in Robots:
-            obstacles.append(robot.update_obstacles(Robots, obs))
+            #! EXERCISE 2: STATE ESTIMATION ERROR
+            obstacles.append(robot.update_obstacles(Robots, obs, noisy=False))
 
         u_hat_acc = []
         for robot in Robots:
@@ -48,24 +58,15 @@ def main():
             y = 0
             z = 0
             for robot in Robots:
-                # start_time = time.time()
                 ecbf_control.plot_step(robot.id, robot.ecbf, np.array(obstacles[robot.id]["obs"])[:, :, 0].T, u_hat_acc[robot.id], robot.state_hist, ax1)
-                # proc2_time = time.time()
-                # print("Time Elapsed (plot_step)", proc2_time - start_time)
-                
-                
                 p.append( robot.ecbf.compute_plot_z(np.array(obstacles[robot.id]["obs"])[:, :, 0].T) )
-                # proc3_time = time.time()
-                # print("Time Elapsed (compute_plot_z)", proc3_time - proc2_time)
                 x = x + p[robot.id]["x"]
                 y = y + p[robot.id]["y"]
                 z = z + p[robot.id]["z"]
                 
                 sz = sz + 1
-            # start_time = time.time()
+                 
             Robot2.ecbf.plot_h(x/sz, y/sz, z/sz)
-            # proc2_time = time.time()
-            # print("Time Elapsed (plot_H)", proc2_time - start_time)
             plt.pause(0.00000001)
 
 if __name__=="__main__":
