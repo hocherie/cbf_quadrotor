@@ -6,8 +6,11 @@ from cvxopt import matrix
 from cvxopt import solvers
 from matplotlib.patches import Ellipse
 import time
+import warnings
 
-a = 2
+warnings.filterwarnings("ignore")
+
+a = 1
 b = 1
 safety_dist = 2
 robot_radius = 0.25
@@ -98,22 +101,23 @@ class ECBF_control():
 
     def compute_safe_control(self,obs, obs_v, id):
         if self.use_safe:
-            A = self.compute_A(obs)
+            optimized_u = self.compute_nom_control() ## Exercise 1: Write Minimum Interventional Control
+            # A = self.compute_A(obs)
 
-            b_ineq = self.compute_b(obs, obs_v)
-            #Make CVXOPT quadratic programming problem
-            P = matrix(np.eye(2), tc='d')
-            q = -1 * matrix(self.compute_nom_control(), tc='d')
-            G = -1 * matrix(A.astype(np.double), tc='d')
+            # b_ineq = self.compute_b(obs, obs_v)
+            # #Make CVXOPT quadratic programming problem
+            # P = matrix(np.eye(2), tc='d')
+            # q = -1 * matrix(self.compute_nom_control(), tc='d')
+            # G = -1 * matrix(A.astype(np.double), tc='d')
 
-            h = -1 * matrix(b_ineq.astype(np.double), tc='d')
-            solvers.options['show_progress'] = False
-            try:
-                sol = solvers.qp(P,q,G, h, verbose=False) # get dictionary for solution
-                optimized_u = sol['x']
-            except:
-                print("Robot "+str(id)+": NO SOLUTION!!!")
-                optimized_u = [[0], [0]]
+            # h = -1 * matrix(b_ineq.astype(np.double), tc='d')
+            # solvers.options['show_progress'] = False
+            # try:
+            #     sol = solvers.qp(P,q,G, h, verbose=False) # get dictionary for solution
+            #     optimized_u = sol['x']
+            # except:
+            #     print("Robot "+str(id)+": NO SOLUTION!!!")
+            #     optimized_u = [[0], [0]]
 
             
 
