@@ -101,8 +101,16 @@ class ECBF_control():
         if self.use_safe:
             try:
                 A = self.compute_A(obs)
-                b = self.compute_b(obs, obs_v)
+                b_ineq = self.compute_b(obs, obs_v)
                 optimized_u = self.compute_nom_control() #! REPLACE!! Exercise 1: Write Minimum Interventional Control
+                P = matrix(np.eye(2), tc='d')
+                q = -1 * matrix(self.compute_nom_control(), tc='d')
+                G = -1 * matrix(A.astype(np.double), tc='d')
+
+                h = -1 * matrix(b_ineq.astype(np.double), tc='d')
+                solvers.options['show_progress'] = False
+                sol = solvers.qp(P,q,G, h, verbose=False) # get dictionary for solution
+                optimized_u = sol['x']
             except:
                 print("Robot "+str(id)+": NO SOLUTION!!!")
                 optimized_u = [[0], [0]]
@@ -208,6 +216,7 @@ def plot_step(id, ecbf, new_obs, u_hat_acc, state_hist, plot_handle):
     plot_handle.text(state_hist_plot[-1,0]+0.2, state_hist_plot[-1,1]+0.2, str(id))
     if is_crash:
         plot_handle.set_title("CRASHED!")
+
     for i in range(new_obs.shape[1]):
         plot_handle.plot(new_obs[0, i], new_obs[1, i], '8k') # obs
     
