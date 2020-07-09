@@ -6,7 +6,7 @@ Includes following files:
 
 
 
-* **`ecbf_control.py`**: Contains `ECBF_CONTROL()` class for Exponential Control Barrier Function (ECBF). 
+<!-- * **`ecbf_control.py`**: Contains `ECBF_CONTROL()` class for Exponential Control Barrier Function (ECBF). 
 
 * **`run_one_robot_obs.py`**: Example - Single quadrotor avoiding obstacle at center using ECBFs.
 * **`run_two_robots.py`**: Example - Two quadrotor avoiding each other using ECBFs.
@@ -24,7 +24,7 @@ From [hocherie/2d_grid_playground](https://github.com/hocherie/2d_grid_playgroun
 
 * **`simulator.py`**: (Unused by CBF files) Creates 2D grid simulator and enables basic range sening. Contains Map class (create from txt file), Robot class (stores current and paast state, also instantiates QuadDynamics object). 
 
-* **`evaluate.py`** : (Unused by CBF files) Contains functions to evaluate safe control methods. 
+* **`evaluate.py`** : (Unused by CBF files) Contains functions to evaluate safe control methods.  -->
 
 ## Getting Started 
 
