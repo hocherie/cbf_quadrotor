@@ -99,7 +99,14 @@ class ECBF_control():
 
     def compute_safe_control(self,obs, obs_v, id):
         if self.use_safe:
-            optimized_u = self.compute_nom_control() #! REPLACE!! Exercise 1: Write Minimum Interventional Control
+            try:
+                A = self.compute_A(obs)
+                b = self.compute_b(obs, obs_v)
+                optimized_u = self.compute_nom_control() #! REPLACE!! Exercise 1: Write Minimum Interventional Control
+            except:
+                print("Robot "+str(id)+": NO SOLUTION!!!")
+                optimized_u = [[0], [0]]
+            
 
         else:
             optimized_u = self.compute_nom_control()
@@ -162,7 +169,11 @@ class Robot_Sim():
             obs_v.append(robot.state["xdot"][:2].reshape(2,1))
         if not len(obs):
             return {"obs":obst, "obs_v":obs_v}
-        for i in range(obs.shape[1]):
+        if obs.ndim == 1:
+            obst.append(obs.reshape(2,1))
+            obs_v.append(np.array([[0], [0]]))
+            return {"obs":obst, "obs_v":obs_v}
+        for i in range(obs.shape[0]):
             obst.append(obs[i].reshape(2,1))
             obs_v.append(np.array([[0], [0]]))
         
@@ -197,7 +208,6 @@ def plot_step(id, ecbf, new_obs, u_hat_acc, state_hist, plot_handle):
     plot_handle.text(state_hist_plot[-1,0]+0.2, state_hist_plot[-1,1]+0.2, str(id))
     if is_crash:
         plot_handle.set_title("CRASHED!")
-
     for i in range(new_obs.shape[1]):
         plot_handle.plot(new_obs[0, i], new_obs[1, i], '8k') # obs
     

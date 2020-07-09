@@ -2,6 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import ecbf_control
 from ecbf_control import Robot_Sim
+import warnings
+
+warnings.filterwarnings("ignore")
 
 def main():
     #! EXERCISE 1: FILL OUT ECBF_CONTROL.PY compute_safe_control()
@@ -16,10 +19,11 @@ def main():
     x_init2 =np.array([-5, 3, 10])
     goal_init2 =np.array([[4], [-6]])
     Robot2 = Robot_Sim(x_init2, goal_init2, robot_id=1)
+
     
 
-    #! EXERCISE 3: ADD 2 More Robots (4 in Total). Don't overlap
-    #! EXERCISE 4: CREATE DEADLOCK WITH 4 ROBOTS, FIX IT
+    #! EXERCISE 2: ADD 2 More Robots (4 in Total). Don't overlap + ADD some obstacles
+    #! EXERCISE 3: CREATE DEADLOCK WITH 4 ROBOTS (No Obstacle), FIX IT
 
 
     Robots = [Robot1, Robot2] #! E3: Append with new robots
@@ -29,13 +33,15 @@ def main():
     a, ax1 = plt.subplots()
     
     ## Define Obstacles
+    # obs = np.array([[2], [2]])
+
     obs = []  
 
     for tt in range(20000):
 
         obstacles = []
         for robot in Robots:
-            #! EXERCISE 2: STATE ESTIMATION ERROR (noisy=True)
+            #! EXERCISE 4: STATE ESTIMATION ERROR (noisy=True)
             obstacles.append(robot.update_obstacles(Robots, obs, noisy=False))
 
         u_hat_acc = []
