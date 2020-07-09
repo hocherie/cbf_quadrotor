@@ -101,26 +101,20 @@ class ECBF_control():
     def compute_safe_control(self,obs, obs_v, id):
         # control in R^2
         if self.use_safe:
-            # try:
-            A = self.compute_A(obs) # For Exercise 1
-            b = self.compute_b(obs, obs_v) # For Exercise 1
-            u_des = self.compute_nom_control() # For Exercise 1
+            try:
+                A = self.compute_A(obs) # For Exercise 1
+                b = self.compute_b(obs, obs_v) # For Exercise 1
+                u_des = self.compute_nom_control() # For Exercise 1
 
-            # optimized_u = u_des #! REPLACE!! Exercise 1: Write Minimum Interventional Control
+                optimized_u = u_des #! REPLACE!! Exercise 1: Write Minimum Interventional Control
 
-            # Solution to Exercise 1
-            P = np.eye(2)
-            q = -1 * u_des
-            G = A 
-            h = b 
-            Sol = solve_qp(P,q,G,h)
-            optimized_u = Sol['x']
+                # Solution to Exercise 1
 
-            optimized_u += np.random.random() * np.linalg.norm(optimized_u) * 0.1
+                # Solution to Exercise 3
 
-            # except:
-            #     print("Robot "+str(id)+": NO SOLUTION!!!")
-            #     optimized_u = [[0], [0]]
+            except:
+                print("Robot "+str(id)+": NO SOLUTION!!!")
+                optimized_u = [[0], [0]]
             
 
         else:
