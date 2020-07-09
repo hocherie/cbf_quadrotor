@@ -8,7 +8,7 @@ from matplotlib.patches import Ellipse
 import time
 import warnings
 
-warnings.filterwarnings("ignore")
+# warnings.filterwarnings("ignore")
 
 a = 1
 b = 1
@@ -76,6 +76,7 @@ class ECBF_control():
             
             A = np.array(np.vstack((A, Atemp)))
         
+        A = -1 * matrix(A.astype(np.double), tc='d')
         return A
 
     def compute_h_hd(self, obs, obs_v):
@@ -92,17 +93,26 @@ class ECBF_control():
         extra = extra.reshape(obs.shape[1], 1)
 
         b_ineq =  extra - ( self.K[0] * self.compute_h(obs) + self.K[1] * self.compute_hd(obs, obs_v) )
-        
+        b_ineq = -1 * matrix(b_ineq.astype(np.double), tc='d')
         return b_ineq
 
 
 
     def compute_safe_control(self,obs, obs_v, id):
+        # control in R^2
         if self.use_safe:
             try:
                 A = self.compute_A(obs)
                 b = self.compute_b(obs, obs_v)
-                optimized_u = self.compute_nom_control() #! REPLACE!! Exercise 1: Write Minimum Interventional Control
+                u_des = self.compute_nom_control() #! REPLACE!! Exercise 1: Write Minimum Interventional Control
+
+                P = np.eye(2)
+                q = -1 * u_des
+                G = A 
+                h = b 
+                Sol = solve_qp(P,q,G,h)
+                optimized_u = Sol['x']
+
             except:
                 print("Robot "+str(id)+": NO SOLUTION!!!")
                 optimized_u = [[0], [0]]
@@ -120,7 +130,9 @@ class ECBF_control():
 
         if np.linalg.norm(u_nom) > 0.1:
             u_nom = (u_nom/np.linalg.norm(u_nom))* 0.1
-        return u_nom.astype(np.double)
+        return matrix(u_nom, tc='d')
+
+
 
 
 class Robot_Sim():
@@ -226,3 +238,13 @@ def plot_step(id, ecbf, new_obs, u_hat_acc, state_hist, plot_handle):
 
     plot_handle.set_xlim([-10, 10])
     plot_handle.set_ylim([-10, 10])
+
+def solve_qp(P,q,G,h):
+    # Custom wrapper to take in numpy array
+    # Converts to matrix double
+    P = matrix(P,tc='d')
+    q = matrix(q,tc='d')
+    G = matrix(G,tc='d')
+    h = matrix(h,tc='d')
+    Sol = solvers.qp(P,q,G,h)
+    return Sol
