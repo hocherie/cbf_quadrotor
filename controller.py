@@ -38,8 +38,8 @@ def dynamic_inversion(des_acc, state, param_dict):
     des_roll = des_angle[0] * np.sin(yaw) - des_angle[1] * np.cos(yaw)
 
     # TODO: move to attitude controller?
-    # des_pitch = np.clip(des_pitch, np.radians(-30), np.radians(30))
-    # des_roll = np.clip(des_roll, np.radians(-30), np.radians(30))
+    des_pitch = np.clip(des_pitch, np.radians(-30), np.radians(30))
+    des_roll = np.clip(des_roll, np.radians(-30), np.radians(30))
 
     # TODO: currently, set yaw as constant
     des_yaw = yaw

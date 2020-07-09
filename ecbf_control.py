@@ -8,7 +8,7 @@ from matplotlib.patches import Ellipse
 import time
 import warnings
 
-warnings.filterwarnings("ignore")
+# warnings.filterwarnings("ignore")
 
 a = 1
 b = 1
@@ -76,6 +76,7 @@ class ECBF_control():
             
             A = np.array(np.vstack((A, Atemp)))
         
+        A = -1 * matrix(A.astype(np.double), tc='d')
         return A
 
     def compute_h_hd(self, obs, obs_v):
@@ -92,25 +93,29 @@ class ECBF_control():
         extra = extra.reshape(obs.shape[1], 1)
 
         b_ineq =  extra - ( self.K[0] * self.compute_h(obs) + self.K[1] * self.compute_hd(obs, obs_v) )
-        
+        b_ineq = -1 * matrix(b_ineq.astype(np.double), tc='d')
         return b_ineq
 
 
 
     def compute_safe_control(self,obs, obs_v, id):
+        # control in R^2
         if self.use_safe:
             try:
-                A = self.compute_A(obs)
-                b_ineq = self.compute_b(obs, obs_v)
-                optimized_u = self.compute_nom_control() #! REPLACE!! Exercise 1: Write Minimum Interventional Control
-                P = matrix(np.eye(2), tc='d')
-                q = -1 * matrix(self.compute_nom_control(), tc='d')
-                G = -1 * matrix(A.astype(np.double), tc='d')
+                A = self.compute_A(obs) # For Exercise 1
+                b = self.compute_b(obs, obs_v) # For Exercise 1
+                u_des = self.compute_nom_control() # For Exercise 1
 
-                h = -1 * matrix(b_ineq.astype(np.double), tc='d')
-                solvers.options['show_progress'] = False
-                sol = solvers.qp(P,q,G, h, verbose=False) # get dictionary for solution
-                optimized_u = sol['x']
+                # optimized_u = u_des #! REPLACE!! Exercise 1: Write Minimum Interventional Control
+
+                # Solution to Exercise 1
+                P = np.eye(2)
+                q = -1 * u_des
+                G = A 
+                h = b 
+                Sol = solve_qp(P,q,G,h)
+                optimized_u = Sol['x']
+
             except:
                 print("Robot "+str(id)+": NO SOLUTION!!!")
                 optimized_u = [[0], [0]]
@@ -126,9 +131,11 @@ class ECBF_control():
         vd = Kn[0]*(np.atleast_2d(self.state["x"][:2]).T - self.goal)
         u_nom = Kn[1]*(np.atleast_2d(self.state["xdot"][:2]).T - vd)
 
-        if np.linalg.norm(u_nom) > 0.1:
-            u_nom = (u_nom/np.linalg.norm(u_nom))* 0.1
-        return u_nom.astype(np.double)
+        if np.linalg.norm(u_nom) > 0.05:
+            u_nom = (u_nom/np.linalg.norm(u_nom))* 0.05
+        return matrix(u_nom, tc='d')
+
+
 
 
 class Robot_Sim():
@@ -212,6 +219,7 @@ def plot_step(id, ecbf, new_obs, u_hat_acc, state_hist, plot_handle):
 
     plot_handle.plot(state_hist_plot[:, 0], state_hist_plot[:, 1])
     plot_handle.plot(ecbf.goal[0], ecbf.goal[1], '*r')
+    plot_handle.text(ecbf.goal[0]+0.2, ecbf.goal[1]+0.2, str(id),color='r')
     # plot_handle.plot(state_hist_plot[-1, 0], state_hist_plot[-1, 1], '8k') # current
     plot_handle.text(state_hist_plot[-1,0]+0.2, state_hist_plot[-1,1]+0.2, str(id))
     if is_crash:
@@ -235,3 +243,15 @@ def plot_step(id, ecbf, new_obs, u_hat_acc, state_hist, plot_handle):
 
     plot_handle.set_xlim([-10, 10])
     plot_handle.set_ylim([-10, 10])
+
+def solve_qp(P,q,G,h):
+    # Custom wrapper cvxopt.solvers.qp
+    # Takes in numpy array Converts to matrix double
+    P = matrix(P,tc='d')
+    q = matrix(q,tc='d')
+    G = matrix(G,tc='d')
+    h = matrix(h,tc='d')
+    solvers.options['show_progress'] = False
+    Sol = solvers.qp(P,q,G,h)
+    
+    return Sol
