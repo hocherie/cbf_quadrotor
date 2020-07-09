@@ -19,10 +19,10 @@ def main():
     Robot1 = Robot_Sim(x_init1, goal_init1, robot_id=1)
     #! EXERCISE 2: ADD 2 More Robots (4 in Total). Don't overlap + ADD some obstacles
     x_init2 =np.array([8, 5, 10])
-    goal_init2 =np.array([[-2], [-8]])
+    goal_init2 =np.array([[-3], [-7]])
     Robot2 = Robot_Sim(x_init2, goal_init2, robot_id=2)
 
-    x_init3 =np.array([-2, -7, 10])
+    x_init3 =np.array([-5, -3, 10])
     goal_init3 =np.array([[7], [5]])
     Robot3 = Robot_Sim(x_init3, goal_init3, robot_id=3)
 
@@ -36,9 +36,10 @@ def main():
     a, ax1 = plt.subplots()
     
     ## Define Obstacles
-    # obs = np.array([[2], [2]])
+    obs1 = np.array([[2], [2]])
+    obs2 = np.array([[-2], [-2]])
 
-    obs = []  
+    obs = np.hstack((obs1, obs2)).T    
 
     for tt in range(20000):
 

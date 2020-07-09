@@ -6,28 +6,28 @@ from ecbf_control import Robot_Sim
 def main():
     
     ### Robot 1
-    x_init1 = np.array([0, -6, 10])
-    goal_init1 =np.array([[0], [6]])
-    Robot1 = Robot_Sim(x_init1, goal_init1, 0)
+    x_init0 = np.array([3, -5, 10])
+    goal_init0 =np.array([[-6], [4]])
+    Robot0 = Robot_Sim(x_init0, goal_init0, robot_id=0)
 
     ### Robot 2
 
-    x_init2 =np.array([0, 6, 10])
-    goal_init2 =np.array([[0], [-6]])
-    Robot2 = Robot_Sim(x_init2, goal_init2, 1)
+    x_init1 =np.array([-5, 3, 10])
+    goal_init1 =np.array([[4], [-6]])
+    Robot1 = Robot_Sim(x_init1, goal_init1, robot_id=1)
 
 
     ### Robot 3
 
-    x_init3 =np.array([6, 0, 10])
-    goal_init3 =np.array([[-6], [0]])
-    Robot3 = Robot_Sim(x_init3, goal_init3, 2)
+    x_init2 =np.array([3, 5, 10])
+    goal_init2 =np.array([[-3], [-7]])
+    Robot2 = Robot_Sim(x_init2, goal_init2, robot_id=2)
 
     ### Robot 4
 
-    x_init4 =np.array([-6, 0, 10])
-    goal_init4 =np.array([[6], [0]])
-    Robot4 = Robot_Sim(x_init4, goal_init4, 3)
+    x_init3 =np.array([-5, -3, 10])
+    goal_init3 =np.array([[7], [5]])
+    Robot3 = Robot_Sim(x_init3, goal_init3, robot_id=3)
 
     # ### Robot 5
 
@@ -35,7 +35,7 @@ def main():
     # goal_init5 =np.array([[-6], [0]])
     # Robot5 = Robot_Sim(x_init5, goal_init5, 4)
     
-    Robots = [Robot1, Robot2, Robot3, Robot4]
+    Robots = [Robot0, Robot0, Robot3, Robot4]
 
     plt.plot([2, 2, 3])
 
