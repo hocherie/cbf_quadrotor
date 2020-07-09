@@ -41,7 +41,7 @@ $ pyenv local safety-cbf            # Activate virtual env
 $ pip install -r requirements.txt   # Install dependencies
 ```
 
-### Play with Control Barrier Function Safe Control (1 Robot, 1 Obstacle)
+<!-- ### Play with Control Barrier Function Safe Control (1 Robot, 1 Obstacle)
 `$ python run_one_robot_obs.py`
 
 <img src="docs/ecbf_single_obs.gif" width="400">
@@ -65,10 +65,10 @@ Code first generates trajectory then visualizes.
 
 <img src="docs/2d_grid.gif" width="400">
 Robot executes naive safe control to stay safe in 2D obstacle environment given range measurements. Calculates opposing vector to closest obstacle to repulse away. Uses dynamics and controllers to move.
-Originally given straight input.
+Originally given straight input. -->
 
 
-# TODO
+<!-- # TODO
 - [x] add ecbf to README
 - [ ] update conda yml file
 - [x] rename conda environment
@@ -80,7 +80,7 @@ Originally given straight input.
 - [ ] Comment all functions
 - [ ] Add multi-robot ECBF (MM)
 - [ ] Replace first GIF with cool multi-robot (MM)
-- [ ] Links to reference papers 
+- [ ] Links to reference papers  -->
 
 # Author
 Cherie Ho (cherieh@cs.cmu.edu)
