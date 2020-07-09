@@ -9,24 +9,32 @@ warnings.filterwarnings("ignore")
 def main():
     #! EXERCISE 1: FILL OUT ECBF_CONTROL.PY compute_safe_control()
     
+    ### Define Robot 0
+    x_init0 = np.array([3, -5, 10])
+    goal_init0 =np.array([[-6], [4]])
+    Robot0 = Robot_Sim(x_init0, goal_init0, robot_id=0)
+
     ### Define Robot 1
-    x_init1 = np.array([3, -5, 10])
-    goal_init1 =np.array([[-6], [4]])
-    Robot1 = Robot_Sim(x_init1, goal_init1, robot_id=0)
 
-    ### Define Robot 2
-
-    x_init2 =np.array([-5, 3, 10])
-    goal_init2 =np.array([[4], [-6]])
-    Robot2 = Robot_Sim(x_init2, goal_init2, robot_id=1)
+    x_init1 =np.array([-5, 3, 10])
+    goal_init1 =np.array([[4], [-6]])
+    Robot1 = Robot_Sim(x_init1, goal_init1, robot_id=1)
 
     
 
     #! EXERCISE 2: ADD 2 More Robots (4 in Total). Don't overlap + ADD some obstacles
+    x_init2 =np.array([8, 5, 10])
+    goal_init2 =np.array([[-2], [-8]])
+    Robot2 = Robot_Sim(x_init2, goal_init2, robot_id=2)
+
+    x_init3 =np.array([-2, -7, 10])
+    goal_init3 =np.array([[7], [5]])
+    Robot3 = Robot_Sim(x_init3, goal_init3, robot_id=3)
+
     #! EXERCISE 3: CREATE DEADLOCK WITH 4 ROBOTS (No Obstacle), FIX IT
 
 
-    Robots = [Robot1, Robot2] #! E3: Append with new robots
+    Robots = [Robot0, Robot1, Robot2,Robot3] #! E2: Append with new robots
 
     
 

@@ -131,8 +131,8 @@ class ECBF_control():
         vd = Kn[0]*(np.atleast_2d(self.state["x"][:2]).T - self.goal)
         u_nom = Kn[1]*(np.atleast_2d(self.state["xdot"][:2]).T - vd)
 
-        if np.linalg.norm(u_nom) > 0.1:
-            u_nom = (u_nom/np.linalg.norm(u_nom))* 0.1
+        if np.linalg.norm(u_nom) > 0.05:
+            u_nom = (u_nom/np.linalg.norm(u_nom))* 0.05
         return matrix(u_nom, tc='d')
 
 
@@ -219,6 +219,7 @@ def plot_step(id, ecbf, new_obs, u_hat_acc, state_hist, plot_handle):
 
     plot_handle.plot(state_hist_plot[:, 0], state_hist_plot[:, 1])
     plot_handle.plot(ecbf.goal[0], ecbf.goal[1], '*r')
+    plot_handle.text(ecbf.goal[0]+0.2, ecbf.goal[1]+0.2, str(id),color='r')
     # plot_handle.plot(state_hist_plot[-1, 0], state_hist_plot[-1, 1], '8k') # current
     plot_handle.text(state_hist_plot[-1,0]+0.2, state_hist_plot[-1,1]+0.2, str(id))
     if is_crash:
@@ -249,5 +250,7 @@ def solve_qp(P,q,G,h):
     q = matrix(q,tc='d')
     G = matrix(G,tc='d')
     h = matrix(h,tc='d')
+    solvers.options['show_progress'] = False
     Sol = solvers.qp(P,q,G,h)
+    
     return Sol
