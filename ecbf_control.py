@@ -102,10 +102,13 @@ class ECBF_control():
         # control in R^2
         if self.use_safe:
             try:
-                A = self.compute_A(obs)
-                b = self.compute_b(obs, obs_v)
-                u_des = self.compute_nom_control() #! REPLACE!! Exercise 1: Write Minimum Interventional Control
+                A = self.compute_A(obs) # For Exercise 1
+                b = self.compute_b(obs, obs_v) # For Exercise 1
+                u_des = self.compute_nom_control() # For Exercise 1
 
+                # optimized_u = u_des #! REPLACE!! Exercise 1: Write Minimum Interventional Control
+
+                # Solution to Exercise 1
                 P = np.eye(2)
                 q = -1 * u_des
                 G = A 
@@ -240,8 +243,8 @@ def plot_step(id, ecbf, new_obs, u_hat_acc, state_hist, plot_handle):
     plot_handle.set_ylim([-10, 10])
 
 def solve_qp(P,q,G,h):
-    # Custom wrapper to take in numpy array
-    # Converts to matrix double
+    # Custom wrapper cvxopt.solvers.qp
+    # Takes in numpy array Converts to matrix double
     P = matrix(P,tc='d')
     q = matrix(q,tc='d')
     G = matrix(G,tc='d')
