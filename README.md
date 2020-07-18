@@ -1,8 +1,10 @@
 # cbf_quadrotor
 <img src="docs/ecbf_single_obs.gif" width="400">
 
-Control Barrier Functions (CBFs) for Quadrotors. Work in progress. Based on [hocherie/2d_grid_playground](https://github.com/hocherie/2d_grid_playground) for dynamics simulator, nominal controllers, range sensing.
-Includes following files:
+Control Barrier Functions (CBFs) for Quadrotors. Based on [hocherie/2d_grid_playground](https://github.com/hocherie/2d_grid_playground) for dynamics simulator, nominal controllers, range sensing.
+
+Accompanying Lecture for [Air Lab Summer School 2020](https://theairlab.org/summer2020/): [PDF Slides](docs/ensuring-safety-pdf.pdf)
+<!-- Includes following files: -->
 
 
 
