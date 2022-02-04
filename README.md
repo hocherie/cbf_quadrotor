@@ -84,8 +84,10 @@ Originally given straight input. -->
 - [ ] Replace first GIF with cool multi-robot (MM)
 - [ ] Links to reference papers  -->
 
-# Accompanying Paper
-"Provably Safe" in the Wild: Testing Control Barrier Functions on a Vision-Based Quadrotor in an Outdoor Environment. Presented in 2021 RSS Workshop in Robust Autonomy. [[PDF]](https://openreview.net/pdf?id=CrBJIgBr2BK)
+## Accompanying Paper
+**"Provably Safe" in the Wild: Testing Control Barrier Functions on a Vision-Based Quadrotor in an Outdoor Environment.**
+
+Presented in 2021 RSS Workshop in Robust Autonomy. [[PDF]](https://openreview.net/pdf?id=CrBJIgBr2BK) [[Flight Tests]](https://www.youtube.com/watch?v=1ohaMHlCmDA)
 
 ```
 @inproceedings{hoshih2020provablyinwild,
