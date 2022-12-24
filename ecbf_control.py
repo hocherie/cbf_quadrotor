@@ -75,8 +75,11 @@ class ECBF_control():
             Atemp = np.array([np.hstack((A0, A1))])
             
             A = np.array(np.vstack((A, Atemp)))
+<<<<<<< Updated upstream
         
         A = -1 * matrix(A.astype(np.double), tc='d')
+=======
+>>>>>>> Stashed changes
         return A
 
     def compute_h_hd(self, obs, obs_v):
@@ -93,6 +96,7 @@ class ECBF_control():
         extra = extra.reshape(obs.shape[1], 1)
 
         b_ineq =  extra - ( self.K[0] * self.compute_h(obs) + self.K[1] * self.compute_hd(obs, obs_v) )
+<<<<<<< Updated upstream
         b_ineq = -1 * matrix(b_ineq.astype(np.double), tc='d')
         return b_ineq
 
@@ -100,6 +104,11 @@ class ECBF_control():
 
     def compute_safe_control(self,obs, obs_v, id):
         # control in R^2
+=======
+        return b_ineq
+
+    def compute_safe_control(self,obs, obs_v):
+>>>>>>> Stashed changes
         if self.use_safe:
             try:
                 A = self.compute_A(obs) # For Exercise 1
